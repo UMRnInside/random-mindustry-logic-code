@@ -1,0 +1,74 @@
+# mlogex version: 0.0.5
+# Compatible with mlogex 0.0.4
+
+print "简易七段数码管风格时钟"
+print "走时+ROM 烧录部分"
+print "作者：UMRnInside"
+print "辅助工具：github.com/UMRnInside/MlogExtended"
+printflush message1
+
+:Start
+xlet UTCTimezone = 8
+
+xlet RomCell = cell1
+__unsafe_call FlashRom
+
+xlet tmp = 0
+:Reclear
+xlet i = 10
+:ClearData
+write -1 cell1 i
+xlet i = i + 1
+jump-if ClearData i < 22
+xlet tmp = tmp + 1
+jump-if Reclear tmp < 3
+
+xcontrol switch1 action=toggle status=0
+
+:Workloop
+__unsafe_call GetLocalTime
+xlet tmp = Second % 10
+write tmp cell1 10
+xlet tmp = Second // 10
+write tmp cell1 11
+xlet tmp = Minute % 10
+write tmp cell1 12
+xlet tmp = Minute // 10
+write tmp cell1 13
+xlet tmp = Hour % 10
+write tmp cell1 14
+xlet tmp = Hour // 10
+write tmp cell1 15
+
+xlet rebootRequested =sensor switch1 @enabled
+jump-if Start rebootRequested === 1
+read result cell1 0
+jump-if Workloop result == 63
+end
+
+# "ROM" "Flashing"
+# Arguments:
+# RomCell: memory cell
+:FlashRom
+write 63 RomCell 0
+write 6 RomCell 1
+write 91 RomCell 2
+write 79 RomCell 3
+write 102 RomCell 4
+write 109 RomCell 5
+write 125 RomCell 6
+write 7 RomCell 7
+write 127 RomCell 8
+write 111 RomCell 9
+__unsafe_return FlashRom
+
+:GetLocalTime
+xlet UnixSecs = @time // 1000
+xlet UTCTimeShift = UTCTimezone * 3600
+xlet UnixSecs = UnixSecs + UTCTimeShift
+xlet Second = UnixSecs % 60
+xlet UnixSecs = UnixSecs // 60
+xlet Minute = UnixSecs % 60
+xlet UnixSecs = UnixSecs // 60
+xlet Hour = UnixSecs % 24
+__unsafe_return GetLocalTime

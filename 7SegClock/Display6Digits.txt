@@ -1,0 +1,176 @@
+# mlogex version: 0.0.5
+
+:Start
+xlet BaseY = 0
+
+:Workloop
+read num cell1 10
+read LastDigit cell1 16
+jump-if Sec10 num == LastDigit
+xlet BaseX = 40
+write num cell1 16
+__unsafe_call DrawNumber
+drawflush display1
+
+:Sec10
+read num cell1 11
+read LastDigit cell1 17
+jump-if Min1 num == LastDigit
+xlet BaseX = 0
+write num cell1 17
+__unsafe_call DrawNumber
+drawflush display1
+
+:Min1
+read num cell1 12
+read LastDigit cell1 18
+jump-if Min10 num == LastDigit
+xlet BaseX = 40
+write num cell1 18
+__unsafe_call DrawNumber
+drawflush display2
+
+:Min10
+read num cell1 13
+read LastDigit cell1 19
+jump-if Hour1 num == LastDigit
+xlet BaseX = 0
+write num cell1 19
+__unsafe_call DrawNumber
+drawflush display2
+
+:Hour1
+read num cell1 14
+read LastDigit cell1 20
+jump-if Hour10 num == LastDigit
+xlet BaseX = 40
+write num cell1 20
+__unsafe_call DrawNumber
+drawflush display3
+read num cell1 15
+
+:Hour10
+read num cell1 15
+read LastDigit cell1 21
+jump-if Workloop num == LastDigit
+xlet BaseX = 0
+write num cell1 21
+__unsafe_call DrawNumber
+drawflush display3
+jump-if Workloop cell1 != null
+end
+
+# Draw one number
+# Arguments:
+# BaseX, BaseY
+:DrawNumber
+xlet DrawStartX = BaseX + 4
+xlet DrawStartY = BaseY + 4
+xdraw color rgb=0x373737
+xdraw rect x=BaseX y=BaseY width=40 height=80
+xdraw color rgb=0xFF5252
+read DrawingMask cell1 num
+__unsafe_call DrawSevenSegment
+__unsafe_return DrawNumber
+
+# 7-segment display drawing, with 40px width, 80px height and 4px margin.
+# Arguments:
+# DrawingRom: a memory cell, store data involved in 7-segment display control
+# DrawStartX, DrawStartY: start position of numbers
+# DrawingMask: a mask, max 0x7F
+# 7-segment order: https://zh.wikipedia.org/wiki/File:7_segment_display_labeled.svg
+:DrawSevenSegment
+
+:DrawA
+xlet _SMask = 1 << 0
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawB _SMatch == 0
+xlet SegmentStartX = 4 + DrawStartX
+xlet SegmentStartY = 65 + DrawStartY
+__unsafe_call DrawHorizonalSegment
+
+:DrawB
+xlet _SMask = 1 << 1
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawC _SMatch == 0
+xlet SegmentStartX = 25 + DrawStartX
+xlet SegmentStartY = 37 + DrawStartY
+__unsafe_call DrawVerticalSegment
+
+:DrawC
+xlet _SMask = 1 << 2
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawD _SMatch == 0
+xlet SegmentStartX = 25 + DrawStartX
+xlet SegmentStartY = 4 + DrawStartY
+__unsafe_call DrawVerticalSegment
+
+:DrawD
+xlet _SMask = 1 << 3
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawE _SMatch == 0
+xlet SegmentStartX = 4 + DrawStartX
+xlet SegmentStartY = 0 + DrawStartY
+__unsafe_call DrawHorizonalSegment
+
+:DrawE
+xlet _SMask = 1 << 4
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawF _SMatch == 0
+xlet SegmentStartX = 0 + DrawStartX
+xlet SegmentStartY = 4 + DrawStartY
+__unsafe_call DrawVerticalSegment
+
+:DrawF
+xlet _SMask = 1 << 5
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawG _SMatch == 0
+xlet SegmentStartX = 0 + DrawStartX
+xlet SegmentStartY = 37 + DrawStartY
+__unsafe_call DrawVerticalSegment
+
+:DrawG
+xlet _SMask = 1 << 6
+xlet _SMatch = DrawingMask & _SMask
+jump-if DrawNumberEnd _SMatch == 0
+xlet SegmentStartX = 4 + DrawStartX
+xlet SegmentStartY = 33 + DrawStartY
+__unsafe_call DrawHorizonalSegment
+
+:DrawNumberEnd
+__unsafe_return DrawSevenSegment
+
+
+# Draw 6x(3+24+3) segment
+# Arguments:
+# SegmentStartX, SegmentStartY
+:DrawVerticalSegment
+# xlet DrawRectW = 6
+# xlet DrawRectH = 24
+# xlet DrawRectX1 = 0 + SegmentStartX
+xlet DrawRectY1 = 3 + SegmentStartY
+xlet DrawRectX2 = 6 + SegmentStartX
+xlet DrawRectY2 = 27 + SegmentStartY
+xlet DrawCentralX = 3 + SegmentStartX
+xlet DrawTopY = 30 + SegmentStartY
+xdraw rect x=SegmentStartX y=DrawRectY1 width=6 height=24
+xdraw triangle x1=SegmentStartX y1=DrawRectY1 x2=DrawRectX2 y2=DrawRectY1 x3=DrawCentralX y3=SegmentStartY
+xdraw triangle x1=SegmentStartX y1=DrawRectY2 x2=DrawRectX2 y2=DrawRectY2 x3=DrawCentralX y3=DrawTopY
+__unsafe_return DrawVerticalSegment
+
+# Draw (3+16+3)x6 segment, tuned for logic display
+# Arguments:
+# SegmentStartX, SegmentStartY
+:DrawHorizonalSegment
+# xlet DrawRectW = 17
+# xlet DrawRectH = 6
+xlet DrawRectX1 = 3 + SegmentStartX
+# xlet DrawRectY1 = 0 + SegmentStartY
+xlet DrawRectX2 = 20 + SegmentStartX
+xlet DrawRectY2 = 6 + SegmentStartY
+xlet DrawRightX = 23 + SegmentStartX
+xlet DrawCentralY = 3 + SegmentStartY
+xdraw rect x1=DrawRectX1 y1=SegmentStartY width=17 height=6
+xdraw triangle x1=DrawRectX1 y1=SegmentStartY x2=DrawRectX1 y2=DrawRectY2 x3=SegmentStartX y3=DrawCentralY
+xdraw triangle x1=DrawRectX2 y1=SegmentStartY x2=DrawRectX2 y2=DrawRectY2 x3=DrawRightX y3=DrawCentralY
+__unsafe_return DrawHorizonalSegment
