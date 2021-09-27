@@ -1,0 +1,91 @@
+# mlogex version: 0.0.5
+
+:Start
+xlet UTCTimezone = 8
+xlet CenterX = 40
+xlet CenterY = 40
+xlet ClearRadius = 33
+xlet SecondHandRadius = 30
+xlet MinuteHandRadius = 20
+xlet HourHandRadius = 10
+xlet _Pi = 3.14159265
+xlet _2Pi = 2.0 * _Pi
+xlet LastSec = -1
+
+:Workloop
+__unsafe_call GetLocalTime
+jump-if Workloop LastSec === Second
+xlet LastSec = Second
+xdraw color rgb=0x373737
+xdraw poly x=CenterX y=CenterY sides=360 radius=ClearRadius rotation=0
+xdraw color rgb=0xFFFFFF
+# xdraw stroke width=1
+# xlet Radius = 36
+# __unsafe_call DrawDial
+
+xdraw stroke width=4
+xlet Angle = Hour * 30
+xlet Radius = HourHandRadius
+__unsafe_call DrawPointer
+
+xdraw color rgb=0x66FFCC
+xdraw stroke width=3
+xlet Angle = Minute * 6
+xlet Radius = MinuteHandRadius
+__unsafe_call DrawPointer
+
+xdraw color rgb=0xFF9900
+xdraw stroke width=2
+xlet Angle = Second * 6
+xlet Radius = SecondHandRadius
+__unsafe_call DrawPointer
+
+drawflush display1
+jump-if Workloop always
+end
+
+# Given angle and radius, calculate X and Y position.
+# Start from (CenterX, CenterY+Radius)
+# Arguments:
+# Angle, Radius, CenterX, CenterY
+# Results:
+# ClockX, ClockY: X and Y position
+:ClockwiseAngleToPosition
+xlet ClockX =sin Angle
+xlet ClockY =cos Angle
+xlet ClockX = ClockX * Radius
+xlet ClockY = ClockY * Radius
+xlet ClockX = ClockX + CenterX
+xlet ClockY = ClockY + CenterY
+__unsafe_return ClockwiseAngleToPosition
+
+# Draw a pointer
+# Arguments:
+# Angle, Radius, CenterX, CenterY
+:DrawPointer
+__unsafe_call ClockwiseAngleToPosition
+xdraw line x1=CenterX y1=CenterY x2=ClockX y2=ClockY
+__unsafe_return DrawPointer
+
+# Arguments:
+# Radius, CenterX, CenterY
+:DrawDial
+xlet Angle = 0
+:DrawDialLoop
+__unsafe_call ClockwiseAngleToPosition
+xdraw poly x=ClockX y=ClockY sides=5 radius=1 rotation=Angle
+xlet Angle = Angle + 30
+jump-if DrawDialLoop Angle < 360
+
+__unsafe_return DrawDial
+
+:GetLocalTime
+xlet UnixSecs = @time // 1000
+xlet UTCTimeShift = UTCTimezone * 3600
+xlet UnixSecs = UnixSecs + UTCTimeShift
+xlet Second = UnixSecs % 60
+xlet UnixSecs = UnixSecs // 60
+xlet Minute = UnixSecs % 60
+xlet UnixSecs = UnixSecs // 60
+xlet Hour = UnixSecs % 24
+__unsafe_return GetLocalTime

@@ -1,0 +1,46 @@
+# mlogex version: 0.0.5
+
+:Start
+xlet UTCTimezone = 8
+xlet CenterX = 40
+xlet CenterY = 40
+xlet DialRadius = 36
+xlet _Pi = 3.14159265
+xlet _2Pi = 2.0 * _Pi
+
+:Workloop
+xdraw color rgb=0xFFFFFF
+xdraw stroke width=1
+xlet Radius = DialRadius
+__unsafe_call DrawDial
+
+drawflush display1
+jump-if Workloop always
+end
+
+# Given angle and radius, calculate X and Y position.
+# Start from (CenterX, CenterY+Radius)
+# Arguments:
+# Angle, Radius, CenterX, CenterY
+# Results:
+# ClockX, ClockY: X and Y position
+:ClockwiseAngleToPosition
+xlet ClockX =sin Angle
+xlet ClockY =cos Angle
+xlet ClockX = ClockX * Radius
+xlet ClockY = ClockY * Radius
+xlet ClockX = ClockX + CenterX
+xlet ClockY = ClockY + CenterY
+__unsafe_return ClockwiseAngleToPosition
+
+# Arguments:
+# Radius, CenterX, CenterY
+:DrawDial
+xlet Angle = 0
+:DrawDialLoop
+__unsafe_call ClockwiseAngleToPosition
+xdraw poly x=ClockX y=ClockY sides=5 radius=1 rotation=Angle
+xlet Angle = Angle + 30
+jump-if DrawDialLoop Angle < 360
+
+__unsafe_return DrawDial
