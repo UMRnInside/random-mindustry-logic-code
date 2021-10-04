@@ -1,0 +1,37 @@
+# mlogex version: 0.0.6
+
+xlet NUMBER_CHANNEL = 63
+xlet BLINK_CHANNEL = 61
+xlet RADIX_CHANNEL = 59
+xlet DIGIT_COUNT_CHANNEL = 62
+
+xlet CYCLES = 20
+xlet HALF_CYCLES = CYCLES // 2
+
+xlet currentEditingDigit = 0
+xlet ctr = 0
+
+:Workloop
+xlet PanelCell = cell1
+xlet DisplayCell = cell2
+
+xlet ctr += 1
+xlet ctr %= CYCLES
+
+write 10 PanelCell RADIX_CHANNEL
+write 10 DisplayCell RADIX_CHANNEL
+
+read totalDigits DisplayCell DIGIT_COUNT_CHANNEL
+write totalDigits PanelCell DIGIT_COUNT_CHANNEL
+read x PanelCell NUMBER_CHANNEL
+write x DisplayCell NUMBER_CHANNEL
+
+read blink PanelCell BLINK_CHANNEL
+jump-if ForceDisplay ctr < HALF_CYCLES
+xlet blink = -1
+:ForceDisplay
+write blink DisplayCell BLINK_CHANNEL
+
+xlet isEditing =sensor EditButton @enabled
+jump-if Workloop always
+end

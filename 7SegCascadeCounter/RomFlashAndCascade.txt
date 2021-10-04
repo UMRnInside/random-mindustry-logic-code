@@ -1,0 +1,96 @@
+# mlogex version: 0.0.6
+
+print "作者：UMRnInside"
+print "辅助工具：github.com/UMRnInside/MlogExtended"
+printflush message1
+xlet NUMBER_CHANNEL = 63
+xlet BLINK_CHANNEL = 61
+xlet RADIX_CHANNEL = 59
+xlet DIGIT_COUNT_CHANNEL = 62
+
+xlet DIGITS_PER_UNIT = 2
+xlet FIRST_DIGIT_INDEX = 32
+xlet SECOND_DIGIT_INDEX = 33
+
+:Start
+xlet RomCell = CurrentCell
+__unsafe_call FlashRom
+
+:Workloop
+xlet CurrentCell = cell1
+xlet NextCell = cell2
+__unsafe_call ChannelsForward
+
+xlet LowDigit = 16
+jump-if BlinkLowDigit CurrentBlink === 0
+xlet LowDigit = CurrentNumber % Radix
+:BlinkLowDigit
+
+xlet CurrentNumber = CurrentNumber // Radix
+xlet HighDigit = 16
+jump-if BlinkHighDigit CurrentBlink === 1
+xlet HighDigit = CurrentNumber % Radix
+:BlinkHighDigit
+
+write LowDigit CurrentCell FIRST_DIGIT_INDEX
+write HighDigit CurrentCell SECOND_DIGIT_INDEX
+
+__unsafe_call ChannelsBackward
+
+read result cell1 0
+jump-if Workloop result == 63
+end
+
+# "ROM" "Flashing"
+# Arguments:
+# RomCell: memory cell
+:FlashRom
+write 63 RomCell 0
+write 6 RomCell 1
+write 91 RomCell 2
+write 79 RomCell 3
+write 102 RomCell 4
+write 109 RomCell 5
+write 125 RomCell 6
+write 7 RomCell 7
+write 127 RomCell 8
+write 111 RomCell 9
+write 119 RomCell 10
+write 124 RomCell 11
+write 57 RomCell 12
+write 94 RomCell 13
+write 121 RomCell 14
+write 113 RomCell 15
+write 0 RomCell 16
+write 64 RomCell 17
+__unsafe_return FlashRom
+
+# From current level to next level
+# Results:
+# Radix: current radix
+# CurrentNumber, CurrentBlink
+:ChannelsForward
+read Radix CurrentCell RADIX_CHANNEL
+write Radix NextCell RADIX_CHANNEL
+
+read CurrentNumber CurrentCell NUMBER_CHANNEL
+xlet Power2 = Radix * Radix
+xlet NextNumber = CurrentNumber // Power2
+write NextNumber NextCell NUMBER_CHANNEL
+
+read CurrentBlink CurrentCell BLINK_CHANNEL
+xlet NextBlink = CurrentBlink - 2
+write NextBlink NextCell BLINK_CHANNEL
+
+__unsafe_return ChannelsForward
+
+# useful in counting total digits
+:ChannelsBackward
+xlet DigitCount = 0
+jump-if ChannelsBackwardCheckEnd NextCell === null
+read DigitCount NextCell DIGIT_COUNT_CHANNEL
+:ChannelsBackwardCheckEnd
+
+xlet DigitCount = DigitCount + 2
+write DigitCount CurrentCell DIGIT_COUNT_CHANNEL
+__unsafe_return ChannelsBackward

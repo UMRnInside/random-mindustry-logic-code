@@ -1,0 +1,118 @@
+# mlogex version: 0.0.6
+
+xlet NUMBER_CHANNEL = 63
+xlet BLINK_CHANNEL = 61
+xlet RADIX_CHANNEL = 59
+xlet DIGIT_COUNT_CHANNEL = 62
+
+xlet FIRST_DIGIT_INDEX = 32
+xlet SECOND_DIGIT_INDEX = 33
+
+xlet currentEditingDigit = 0
+
+:Workloop
+xlet EditButton = switch1
+xlet CarryButton = switch2
+xlet ShiftLeftButton = switch3
+xlet ShiftRightButton = switch4
+xlet UpButton = switch5
+xlet DownButton = switch6
+
+xlet Carrying =sensor CarryButton @enabled
+
+read Radix cell1 RADIX_CHANNEL
+read totalDigits cell1 DIGIT_COUNT_CHANNEL
+read currentNumber cell1 NUMBER_CHANNEL
+
+xlet isEditing =sensor EditButton @enabled
+jump-if OnEditing isEditing == 1
+write -1 cell1 BLINK_CHANNEL
+jump-if Workloop always
+
+:OnEditing
+xlet currentEditingDigit %= totalDigits
+
+xlet tmp =sensor ShiftLeftButton @enabled
+jump-if ShiftRight tmp == 0
+xlet currentEditingDigit += 1
+xlet currentEditingDigit %= totalDigits
+xcontrol ShiftLeftButton action=toggle status=0
+
+:ShiftRight
+xlet tmp =sensor ShiftRightButton @enabled
+jump-if UpDown tmp == 0
+xlet currentEditingDigit += totalDigits
+xlet currentEditingDigit -= 1
+xlet currentEditingDigit %= totalDigits
+xcontrol ShiftRightButton action=toggle status=0
+
+:UpDown
+:Increment
+xlet tmp =sensor UpButton @enabled
+jump-if Decrement tmp == 0
+xcontrol UpButton action=toggle status=0
+xlet Direction = 1
+__unsafe_call ModifyDigit
+
+:Decrement
+xlet tmp =sensor DownButton @enabled
+jump-if AfterDecrement tmp == 0
+xcontrol DownButton action=toggle status=0
+xlet Direction = -1
+__unsafe_call ModifyDigit
+
+:AfterDecrement
+xlet targetCell = cell1
+__unsafe_call PushToSharedMemory
+
+jump-if Workloop always
+end
+
+# Arguments:
+# Radix, Carrying, currentNumber, currentEditingDigit, Direction
+# Results:
+# resultNumber
+:ModifyDigit
+xlet MBase = Radix ** currentEditingDigit
+xlet NBase = MBase * Radix
+xlet lowNumber = currentNumber % MBase
+xlet highNumber = currentNumber // MBase
+xlet editingNumber = highNumber % Radix
+# Remainder is not modulo
+xlet editingNumber += Radix
+xlet editingNumber %= Radix
+
+jump-if ModifyDigitCarrying Carrying == true
+xlet highNumber -= editingNumber
+xlet editingNumber += Direction
+xlet editingNumber += Radix
+xlet editingNumber %= Radix
+xlet highNumber += editingNumber
+jump-if ModifyDigitDone always
+
+:ModifyDigitCarrying
+xlet highNumber += Direction
+:ModifyDigitDone
+xlet highNumber *= MBase
+
+xlet resultNumber = lowNumber
+xlet resultNumber += highNumber
+xlet resultNumber =abs resultNumber
+print highNumber
+print " "
+print lowNumber
+print "\n"
+print MBase
+print " "
+print editingNumber
+print " "
+print currentEditingDigit
+printflush message1
+__unsafe_return ModifyDigit
+
+# Arguments:
+# targetCell, currentEditingDigit, resultNumber
+:PushToSharedMemory
+write resultNumber targetCell NUMBER_CHANNEL
+write currentEditingDigit targetCell BLINK_CHANNEL
+__unsafe_return PushToSharedMemory

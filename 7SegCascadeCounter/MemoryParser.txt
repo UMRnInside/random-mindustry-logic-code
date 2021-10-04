@@ -1,0 +1,36 @@
+# mlogex version: 0.0.5
+# Compatible with mlogex 0.0.4
+
+# print "作者：UMRnInside"
+# print "辅助工具：github.com/UMRnInside/MlogExtended"
+# printflush message1
+xlet CurrentCell = cell1
+xlet NUMBER_CHANNEL = 63
+xlet BLINK_CHANNEL = 61
+xlet RADIX_CHANNEL = 59
+xlet DIGIT_COUNT_CHANNEL = 62
+
+xlet FIRST_DIGIT_INDEX = 32
+xlet SECOND_DIGIT_INDEX = 33
+
+:Workloop
+read Radix CurrentCell RADIX_CHANNEL
+read CurrentNumber CurrentCell NUMBER_CHANNEL
+read CurrentBlink CurrentCell BLINK_CHANNEL
+read DigitCount CurrentCell DIGIT_COUNT_CHANNEL
+read d1 CurrentCell FIRST_DIGIT_INDEX
+read d2 CurrentCell SECOND_DIGIT_INDEX
+
+print "Radix: "
+print Radix
+print "\nNumber: "
+print CurrentNumber
+print "\nBlink: "
+print CurrentBlink
+print "\nDigitCount:"
+print DigitCount
+print "\n"
+print d2
+print " "
+print d1
+printflush message1
