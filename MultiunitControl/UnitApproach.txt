@@ -1,0 +1,21 @@
+# mlogex version: 0.0.9
+# Unit control demo
+
+xlet UnitType = @poly
+xlet Radius = 8
+
+:Workloop
+xlet mcuMark = @thisx * 1000
+xlet mcuMark += @thisy
+
+ubind UnitType
+jump-if Workloop @unit === null 
+xlet unitMark =sensor @unit @flag
+jump-if BindSuccess unitMark === mcuMark
+jump-if Workloop always
+
+:BindSuccess
+# Unit control logic here
+unit-control approach x=@thisx y=@thisy radius=Radius
+
+jump-if Workloop always

@@ -1,0 +1,52 @@
+# mlogex version: 0.1.2
+
+xlet UnitType = @poly
+xlet BindCount = 3
+
+xlet CurrentBound = 0
+xlet LoopStartUnit = null
+xlet ExpandingMode = false
+
+:Workloop
+xlet TargetProcessor = processor1
+xlet TargetMarkX =sensor TargetProcessor @x
+xlet TargetMarkX *= 1000
+xlet TargetMark =sensor TargetProcessor @y
+xlet TargetMark += TargetMarkX
+
+ubind UnitType
+jump-if Workloop @unit === null
+
+xlet startUnitHealth =sensor LoopStartUnit @health
+if startUnitHealth <= 0
+    xlet LoopStartUnit = @unit
+endif
+if @unit === LoopStartUnit
+    xlet ExpandingMode = CurrentBound < BindCount
+    xlet CurrentBound = 0
+endif
+
+xlet unitController =sensor @unit @controller
+xlet unitMark =sensor @unit @flag
+jump-if Bindable unitController === @this
+jump-if Bindable unitController === TargetProcessor
+jump-if Bindable unitMark == TargetMark
+
+if ExpandingMode
+    jump-if Bindable unitController === @unit
+    jump-if Bindable unitMark == 0
+endif
+
+jump-if Workloop always
+
+:Bindable
+if CurrentBound >= BindCount
+    xlet ExpandingMode = false
+    unit-control flag value=0
+else
+    xlet CurrentBound += 1
+    if unitMark != TargetMark
+        unit-control flag value=TargetMark
+    endif
+endif
+jump-if Workloop always
