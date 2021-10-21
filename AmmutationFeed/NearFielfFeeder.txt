@@ -1,0 +1,119 @@
+xlet FetchFromCore = false
+xlet UnitType = @flare
+xlet FeedIfLower = 0.8
+
+:Start
+xlet mcuMark = @thisx * 1000
+xlet mcuMark = mcuMark + @thisy
+xlet i = 0
+
+:Rebind
+ubind UnitType
+jump-if Rebind @unit === null
+xlet controller =sensor @unit @controller
+jump-if BindSuccess controller === @this
+jump-if BindSuccess controller === @unit
+jump-if Rebind always
+
+:BindSuccess
+unit-control flag value=mcuMark
+__unsafe_call FindContainer
+
+:Workloop
+# unit dead?
+xlet unitHealth =sensor @unit @health
+jump-if Start unitHealth <= 0
+# container invalid?
+xlet containerCapacity =sensor Container @itemCapacity
+jump-if BindSuccess containerCapacity <= 0
+
+# xlet controller =sensor @unit @controller
+# jump-if Start controller != @this
+
+xlet itemCapacity =sensor @unit @itemCapacity
+xlet itemCount =sensor @unit @totalItems
+xlet firstItem =sensor @unit @firstItem
+xlet itemType =sensor sorter1 @config
+
+if itemType === null
+    unit-control approach x=@thisx y=@thisy radius=2
+    jump-if Workloop always
+endif
+
+if firstItem != itemType
+    if itemCount > 0
+        unit-locate type=building group=core enemy=false outX=coreX outY=coreY found=found resultBuilding=core
+        if found
+            unit-control approach x=coreX y=coreY radius=2
+            unit-control itemDrop to=core amount=itemCount
+        else
+            unit-control itemDrop to=@air amount=itemCount
+        endif
+        jump-if Workloop always
+    endif
+endif
+
+xlet turret =getlink i
+xlet ammo =sensor turret @ammo
+xlet ammoCapacity =sensor turret @ammoCapacity
+# Sorry, but we don't have for loops :(
+if turret === Container
+    jump-if NextLink always
+elif turret === sorter1
+    jump-if NextLink always
+elif ammoCapacity <= 0
+    jump-if NextLink always
+endif
+
+if itemCount > 0
+    xlet turretRate = ammo / ammoCapacity
+    if turretRate < FeedIfLower
+        xlet turretX =sensor turret @x
+        xlet turretY =sensor turret @y
+        unit-control approach x=turretX y=turretY radius=1
+        unit-control itemDrop to=turret amount=itemCount
+        jump-if Workloop always
+    endif
+else
+    xlet contX =sensor Container @x
+    xlet contY =sensor Container @y
+    unit-control approach x=contX y=contY radius=1
+    unit-control itemTake from=Container amount=itemCapacity item=itemType
+    jump-if Workloop always
+endif
+
+:NextLink
+print i
+printflush message1
+xlet i += 1
+xlet i %= @links
+jump-if Workloop always
+end
+
+# Find first vault or container linked to processor
+# Call AFTER binding unit
+# No Arguments required
+# Results:
+# Container: Building, can be vault or container
+# Overwrites:
+# _nop, _i, buildingTmp, buildingTmpType
+:FindContainer
+xlet Container = null
+if FetchFromCore
+    unit-locate type=building group=core enemy=false outX=_nop outY=_nop found=_nop resultBuilding=Container
+    __unsafe_return FindContainer
+endif
+xlet _i = 0
+while _i < @links
+    xlet buildingTmp =getlink _i
+    xlet buildingTmpType =sensor buildingTmp @type
+    if buildingTmpType === @container
+        xlet Container = buildingTmp
+        break
+    elif buildingTmpType === @vault
+        xlet Container = buildingTmp
+        break
+    endif
+    xlet _i += 1
+wend
+__unsafe_return FindContainer
