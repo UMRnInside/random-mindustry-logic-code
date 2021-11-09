@@ -7,21 +7,13 @@ print "作者：UMRnInside"
 print "辅助工具：github.com/UMRnInside/MlogExtended"
 printflush message1
 
-:Start
-xlet UTCTimezone = 8
+xlet TimeshiftChannel = 63
 
+:Start
 xlet RomCell = cell1
 __unsafe_call FlashRom
 
 xlet tmp = 0
-:Reclear
-xlet i = 10
-:ClearData
-write -1 cell1 i
-xlet i = i + 1
-jump-if ClearData i < 22
-xlet tmp = tmp + 1
-jump-if Reclear tmp < 3
 
 xcontrol switch1 action=toggle status=0
 
@@ -40,8 +32,6 @@ write tmp cell1 14
 xlet tmp = Hour // 10
 write tmp cell1 15
 
-xlet rebootRequested =sensor switch1 @enabled
-jump-if Start rebootRequested === 1
 read result cell1 0
 jump-if Workloop result == 63
 end
@@ -64,7 +54,8 @@ __unsafe_return FlashRom
 
 :GetLocalTime
 xlet UnixSecs = @time // 1000
-xlet UTCTimeShift = UTCTimezone * 3600
+read UTCTimeShift cell1 TimeshiftChannel
+# xlet UTCTimeShift = UTCTimezone * 3600
 xlet UnixSecs = UnixSecs + UTCTimeShift
 xlet Second = UnixSecs % 60
 xlet UnixSecs = UnixSecs // 60

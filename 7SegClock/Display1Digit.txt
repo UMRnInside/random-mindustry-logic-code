@@ -1,20 +1,33 @@
-# mlogex version: 0.0.5
+# mlogex version: 0.1.3
 
 :Start
+# Config part
 # DigitIndex: position that stores the digit to be displayed
-# LastDigitIndex: do "lazy" update, performance is slightly better
-xlet DigitIndex = 10
+# MaxLazyCycles: do "lazy" update, performance is slightly better
+xlet DigitIndex = 32
 xlet BaseX = 40
 xlet BaseY = 0
+xlet MaxLazyCycles = 60
 xlet DrawStartX = BaseX + 4
 xlet DrawStartY = BaseY + 4
-xlet LastDigitIndex = DigitIndex + 6
+
+# Inner part
+xlet LastDigit = -1
+xlet UpdatesSkipped = 0
 
 :Workloop
 read num cell1 DigitIndex
-read LastDigit cell1 LastDigitIndex
-jump-if Workloop num == LastDigit
-write num cell1 LastDigitIndex
+if num != LastDigit
+    jump-if WorkloopUpdate always
+elif UpdatesSkipped >= MaxLazyCycles
+    jump-if WorkloopUpdate always
+endif
+xlet UpdatesSkipped += 1
+jump-if Workloop always
+
+:WorkloopUpdate
+xlet LastDigit = num
+xlet UpdatesSkipped = 0
 
 xdraw color rgb=0x373737
 xdraw rect x=BaseX y=BaseY width=40 height=80
@@ -36,58 +49,65 @@ end
 :DrawA
 xlet _SMask = 1 << 0
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawB _SMatch == 0
-xlet SegmentStartX = 4 + DrawStartX
-xlet SegmentStartY = 65 + DrawStartY
-__unsafe_call DrawHorizonalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 4 + DrawStartX
+    xlet SegmentStartY = 65 + DrawStartY
+    __unsafe_call DrawHorizonalSegment
+endif
 
 :DrawB
 xlet _SMask = 1 << 1
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawC _SMatch == 0
-xlet SegmentStartX = 25 + DrawStartX
-xlet SegmentStartY = 37 + DrawStartY
-__unsafe_call DrawVerticalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 25 + DrawStartX
+    xlet SegmentStartY = 37 + DrawStartY
+    __unsafe_call DrawVerticalSegment
+endif
 
 :DrawC
 xlet _SMask = 1 << 2
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawD _SMatch == 0
-xlet SegmentStartX = 25 + DrawStartX
-xlet SegmentStartY = 4 + DrawStartY
-__unsafe_call DrawVerticalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 25 + DrawStartX
+    xlet SegmentStartY = 4 + DrawStartY
+    __unsafe_call DrawVerticalSegment
+endif
 
 :DrawD
 xlet _SMask = 1 << 3
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawE _SMatch == 0
-xlet SegmentStartX = 4 + DrawStartX
-xlet SegmentStartY = 0 + DrawStartY
-__unsafe_call DrawHorizonalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 4 + DrawStartX
+    xlet SegmentStartY = 0 + DrawStartY
+    __unsafe_call DrawHorizonalSegment
+endif
 
 :DrawE
 xlet _SMask = 1 << 4
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawF _SMatch == 0
-xlet SegmentStartX = 0 + DrawStartX
-xlet SegmentStartY = 4 + DrawStartY
-__unsafe_call DrawVerticalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 0 + DrawStartX
+    xlet SegmentStartY = 4 + DrawStartY
+    __unsafe_call DrawVerticalSegment
+endif
 
 :DrawF
 xlet _SMask = 1 << 5
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawG _SMatch == 0
-xlet SegmentStartX = 0 + DrawStartX
-xlet SegmentStartY = 37 + DrawStartY
-__unsafe_call DrawVerticalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 0 + DrawStartX
+    xlet SegmentStartY = 37 + DrawStartY
+    __unsafe_call DrawVerticalSegment
+endif
 
 :DrawG
 xlet _SMask = 1 << 6
 xlet _SMatch = DrawingMask & _SMask
-jump-if DrawNumberEnd _SMatch == 0
-xlet SegmentStartX = 4 + DrawStartX
-xlet SegmentStartY = 33 + DrawStartY
-__unsafe_call DrawHorizonalSegment
+if _SMatch != 0
+    xlet SegmentStartX = 4 + DrawStartX
+    xlet SegmentStartY = 33 + DrawStartY
+    __unsafe_call DrawHorizonalSegment
+endif
 
 :DrawNumberEnd
 __unsafe_return DrawSevenSegment
