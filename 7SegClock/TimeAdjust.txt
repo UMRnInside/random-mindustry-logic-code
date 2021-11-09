@@ -1,0 +1,47 @@
+# mlogex version: 0.1.3
+print "调时逻辑，默认写入 cell1"
+print "Mindustry v134 改变了 @time 的定义"
+xlet TimeshiftChannel = 63
+
+:Workloop
+read timeshift cell1 TimeshiftChannel
+
+# Seconds
+xlet tmp =sensor switch1 @enabled
+if tmp
+    xlet timeshift -= 1
+    xcontrol switch1 action=toggle status=0
+endif
+
+xlet tmp =sensor switch2 @enabled
+if tmp
+    xlet timeshift += 1
+    xcontrol switch2 action=toggle status=0
+endif
+
+xlet tmp =sensor switch3 @enabled
+if tmp
+    xlet timeshift -= 60
+    xcontrol switch3 action=toggle status=0
+endif
+
+xlet tmp =sensor switch4 @enabled
+if tmp
+    xlet timeshift += 60
+    xcontrol switch4 action=toggle status=0
+endif
+
+xlet tmp =sensor switch5 @enabled
+if tmp
+    xlet timeshift -= 3600
+    xcontrol switch5 action=toggle status=0
+endif
+
+xlet tmp =sensor switch6 @enabled
+if tmp
+    xlet timeshift += 3600
+    xcontrol switch6 action=toggle status=0
+endif
+
+write timeshift cell1 TimeshiftChannel
+jump-if Workloop always
