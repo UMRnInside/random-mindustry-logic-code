@@ -27,8 +27,8 @@ jump-if Start unitHealth <= 0
 xlet containerCapacity =sensor Container @itemCapacity
 jump-if BindSuccess containerCapacity <= 0
 
-# xlet controller =sensor @unit @controller
-# jump-if Start controller != @this
+xlet controller =sensor @unit @controller
+jump-if Start controller != @this
 
 xlet itemCapacity =sensor @unit @itemCapacity
 xlet itemCount =sensor @unit @totalItems
