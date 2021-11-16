@@ -1,11 +1,18 @@
-# mlogex version: 0.1.2
+# mlogex version: 0.1.4
+print "Multi-unit flagger by UMRnInside"
+print "Source code: "
+print "https://github.com/UMRnInside/random-mindustry-logic-code/MultiunitControl"
 
 xlet UnitType = @poly
 xlet BindCount = 3
 
+print "--- Config End ---"
+printflush null
+
 xlet CurrentBound = 0
 xlet LoopStartUnit = null
 xlet ExpandingMode = false
+xlet RoundsBeforeExpanding = 3
 
 :Workloop
 xlet TargetProcessor = processor1
@@ -22,19 +29,27 @@ if startUnitHealth <= 0
     xlet LoopStartUnit = @unit
 endif
 if @unit === LoopStartUnit
-    xlet ExpandingMode = CurrentBound < BindCount
+    if CurrentBound < BindCount
+        xlet RoundsBeforeExpanding -= 1
+        if RoundsBeforeExpanding <= 0
+            xlet ExpandingMode = true
+        endif
+    else
+        xlet RoundsBeforeExpanding = 3
+        xlet ExpandingMode = false
+    endif
     xlet CurrentBound = 0
 endif
 
 xlet unitController =sensor @unit @controller
 xlet unitMark =sensor @unit @flag
-jump-if Bindable unitController === @this
 jump-if Bindable unitController === TargetProcessor
 jump-if Bindable unitMark == TargetMark
 
 if ExpandingMode
     jump-if Bindable unitController === @unit
     jump-if Bindable unitMark == 0
+    jump-if Bindable unitController === @this
 endif
 
 jump-if Workloop always
