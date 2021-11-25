@@ -1,0 +1,49 @@
+xlet total = 6
+
+xlet leadId
+xlet metaglassId
+xlet graphiteId
+xlet siliconId
+xlet titaniumId
+xlet plastaniumId
+
+xlet coalId
+
+# O(@itemCount * n) table making
+xlet i = 0
+while i < @itemCount
+    xlet item =lookup item i
+    if item === @lead
+        xlet leadId = i
+    elif item === @metaglass
+        xlet metaglassId = i
+    elif item === @graphite
+        xlet graphiteId = i
+    elif item === @silicon
+        xlet siliconId = i
+    elif item === @titanium
+        xlet titaniumId = i
+    elif item === @plastanium
+        xlet plastaniumId = i
+    elif item === @coal
+        xlet coalId = i
+    endif
+    xlet i += 1
+wend
+
+write leadId cell1 1
+write metaglassId cell1 2
+write graphiteId cell1 3
+write siliconId cell1 4
+write titaniumId cell1 5
+write plastaniumId cell1 6
+
+xlet unitType =sensor factory1 @config
+# Crawler requires coal
+if unitType === @crawler
+    xlet total += 1
+    write coalId cell1 total
+endif
+write total cell1 0
+
+wait 6

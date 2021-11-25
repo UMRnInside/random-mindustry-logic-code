@@ -1,0 +1,23 @@
+xlet SwitchGap = 20
+xlet Capacity = 150
+
+xlet currentAmount = 300
+xlet unloadingItem = @copper
+read itemTypes cell1 0
+xlet i = 1
+while i <= itemTypes
+    xlet itemId
+    read itemId cell1 i
+    xlet curItem =lookup item itemId
+    xlet curItemAmount =sensor container1 curItem
+    xlet delta = currentAmount - curItemAmount
+    if delta > SwitchGap
+        xlet unloadingItem = curItem
+        xlet currentAmount = curItemAmount
+    endif
+    xlet i += 1
+wend
+
+xlet shouldEnableUnloader = currentAmount < Capacity
+xcontrol unloader1 action=toggle status=shouldEnableUnloader
+xcontrol unloader1 action=config config=unloadingItem

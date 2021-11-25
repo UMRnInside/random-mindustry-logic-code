@@ -1,0 +1,10 @@
+xlet i = 0
+while i < @itemCount
+    xlet item =lookup item i
+    print i
+    print " "
+    print item
+    print "\n"
+    xlet i += 1
+wend
+printflush message1
