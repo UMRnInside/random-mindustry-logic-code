@@ -43,5 +43,9 @@ if tmp
     xcontrol switch6 action=toggle status=0
 endif
 
+while timeshift < 0
+    xlet timeshift += 86400
+wend
+
 write timeshift cell1 TimeshiftChannel
 jump-if Workloop always
