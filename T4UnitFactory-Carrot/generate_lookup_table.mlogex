@@ -1,17 +1,16 @@
-xlet total = 6
+xlet total = 5
 
 xlet leadId
 xlet metaglassId
 xlet graphiteId
 xlet siliconId
 xlet titaniumId
-xlet plastaniumId
 
 xlet coalId
 
 # O(@itemCount * n) table making
 xlet i = 0
-while i < @itemCount
+:DoWhileLoop
     xlet item =lookup item i
     if item === @lead
         xlet leadId = i
@@ -23,20 +22,17 @@ while i < @itemCount
         xlet siliconId = i
     elif item === @titanium
         xlet titaniumId = i
-    elif item === @plastanium
-        xlet plastaniumId = i
     elif item === @coal
         xlet coalId = i
     endif
     xlet i += 1
-wend
+jump-if DoWhileLoop i < @itemCount
 
-write leadId cell1 1
-write metaglassId cell1 2
-write graphiteId cell1 3
-write siliconId cell1 4
+write siliconId cell1 1
+write graphiteId cell1 2
+write metaglassId cell1 3
+write leadId cell1 4
 write titaniumId cell1 5
-write plastaniumId cell1 6
 
 xlet unitType =sensor factory1 @config
 # Crawler requires coal
@@ -46,4 +42,4 @@ if unitType === @crawler
 endif
 write total cell1 0
 
-wait 6
+wait 3

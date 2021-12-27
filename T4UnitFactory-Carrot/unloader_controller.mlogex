@@ -1,4 +1,4 @@
-xlet SwitchGap = 20
+xlet SwitchGap = 5
 xlet Capacity = 150
 
 xlet currentAmount = 300
