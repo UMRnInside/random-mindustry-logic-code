@@ -2,24 +2,23 @@
 
 :Start
 # DigitIndex: position that stores the digit to be displayed
-# LastDigitIndex: do "lazy" update, performance is slightly better
+# LastDigit: do "lazy" update, performance is slightly better
 xlet DigitIndex = 32
 xlet BaseX = 40
 xlet BaseY = 0
 xlet DrawStartX = BaseX + 4
 xlet DrawStartY = BaseY + 4
-xlet LastDigitIndex = DigitIndex + 2
+xlet LastDigit = -1
 xlet UpdatesSkipped = 0
 
 :Workloop
 read num cell1 DigitIndex
-read LastDigit cell1 LastDigitIndex
 jump-if WorkloopUpdate num != LastDigit
 xlet UpdatesSkipped = UpdateSkipped + 1
 jump-if WorkloopUpdate UpdatesSkipped >= 30
 
 :WorkloopUpdate
-write num cell1 LastDigitIndex
+xlet LastDigit = num
 xlet UpdatesSkipped = 0
 
 xdraw color rgb=0x373737

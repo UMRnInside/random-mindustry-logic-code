@@ -1,7 +1,7 @@
 # mlogex version: 0.0.6
 
-print "作者：UMRnInside"
-print "辅助工具：github.com/UMRnInside/MlogExtended"
+print "Author：UMRnInside"
+print "github.com/UMRnInside/MlogExtended"
 printflush message1
 xlet NUMBER_CHANNEL = 63
 xlet BLINK_CHANNEL = 61
