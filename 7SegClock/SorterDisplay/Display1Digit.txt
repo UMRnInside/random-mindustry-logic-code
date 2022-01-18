@@ -1,0 +1,101 @@
+# mlogex version: 0.1.3
+
+:Start
+# Config part
+# DigitIndex: position that stores the digit to be displayed
+xlet DigitIndex = 10
+xlet BrightItemChannel = 61
+xlet DarkItemChannel = 60
+
+:Workloop
+read num cell1 DigitIndex
+read tmp cell1 BrightItemChannel
+xlet BrightItem =lookup item tmp
+read tmp cell1 DarkItemChannel
+xlet DarkItem =lookup item tmp
+
+read DrawingMask cell1 num
+__unsafe_call DrawSevenSegment
+jump-if Workloop cell1 != null
+end
+
+# 7-segment display drawing, with 40px width, 80px height and 4px margin.
+# Arguments:
+# DrawingRom: a memory cell, store data involved in 7-segment display control
+# DrawStartX, DrawStartY: start position of numbers
+# DrawingMask: a mask, max 0x7F
+# 7-segment order: https://zh.wikipedia.org/wiki/File:7_segment_display_labeled.svg
+:DrawSevenSegment
+
+:DrawA
+xlet _SMask = 1 << 0
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter1 action=config config=conf 
+xcontrol sorter2 action=config config=conf 
+
+:DrawB
+xlet _SMask = 1 << 1
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter3 action=config config=conf 
+xcontrol sorter4 action=config config=conf 
+
+:DrawC
+xlet _SMask = 1 << 2
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter5 action=config config=conf 
+xcontrol sorter6 action=config config=conf 
+
+:DrawD
+xlet _SMask = 1 << 3
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter7 action=config config=conf 
+xcontrol sorter8 action=config config=conf 
+
+:DrawE
+xlet _SMask = 1 << 4
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter9 action=config config=conf 
+xcontrol sorter10 action=config config=conf 
+
+:DrawF
+xlet _SMask = 1 << 5
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter11 action=config config=conf 
+xcontrol sorter12 action=config config=conf 
+
+:DrawG
+xlet _SMask = 1 << 6
+xlet _SMatch = DrawingMask & _SMask
+xlet conf = DarkItem
+if _SMatch != 0
+    xlet conf = BrightItem
+endif
+xcontrol sorter13 action=config config=conf 
+xcontrol sorter14 action=config config=conf 
+
+:DrawNumberEnd
+__unsafe_return DrawSevenSegment
