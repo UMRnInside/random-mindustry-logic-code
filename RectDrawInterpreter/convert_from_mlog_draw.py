@@ -2,9 +2,14 @@
 # Convert Mindustry Logic `draw color`, `draw rect` and `drawflush`
 # into an array of int53_t
 import sys
-instructions = []
+input_file = sys.stdin
+output_file = sys.stdout
+if len(sys.argv) >= 3:
+    input_file = open(sys.argv[1], "r")
+    output_file = open(sys.argv[2], "w")
 
-for line in sys.stdin:
+instructions = []
+for line in input_file:
     tokens = line.split()
     if len(tokens) <= 0:
         continue
@@ -33,4 +38,4 @@ for v in instructions:
         memory_block_id += 1
         pos = 0
 
-print("\n".join(result))
+print("\n".join(result), file=output_file)
